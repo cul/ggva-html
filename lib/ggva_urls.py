@@ -18,28 +18,31 @@ def parse_id(input):
       return re.sub(r'\.sid$','',q['image'][0])
     else:
       return q
-  return False  
+  return False
 def transform_url(input,map):
   _id = parse_id(input)
   if _id:
     format = IIIF_LINK if detect_jpeg(input) else DLC_DETAILS
     return format % {'pid' : map[_id]}
-  return False  
-class GGVAParser:
+  return False
+class Transformer:
   def __init__(self,id_map):
-    self.parser = ElementTree()
     self.id_map = id_map
-  def transform(input, output):
+  def transform(self, input, output):
+    tree = ElementTree()
     tree.parse(input)
     links = tree.getiterator("a")
     for a in links:
-      repl = transform_url(a['href'])
+
+      repl = transform_url(a.attrib['href'], self.id_map) if a.attrib.has_key('href') else False
       if repl:
-        pass
+        a.attrib['href'] = repl
+        if detect_sid(a.attrib['href']):
+          a.text = 'Zoom'
 #       parse out ID
 #       lookup PID
 #       replace URL
-#       replace text 'MrSID' with 'Details'
+#       replace text 'MrSID' with 'Zoom'
 #     elsif a matches jpeg pattern:
 #       parse out ID
 #       lookup PID

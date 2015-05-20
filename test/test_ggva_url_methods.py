@@ -1,4 +1,5 @@
 import unittest
+import difflib
 import ggva_urls
 class TestGGVAUrlMethods(unittest.TestCase):
   HAS_JPEG = "http://www.columbia.edu/cgi-bin/cul/mrsid/image_jpeg.pl?client=ggva&amp;image=NYDA.1960.001.00870.sid&amp;x=1200&amp;y=800&amp;level=2&amp;width=800&amp;height=600"
@@ -13,6 +14,23 @@ class TestGGVAUrlMethods(unittest.TestCase):
   'NYDA.1960.001.00872' : 'ldpd:289341',
   'NYDA.1960.001.00873' : 'ldpd:286821'
   }
+
+  def assertMultiLineEqual(self, expected, actual, msg=None):
+    """Assert that two multi-line strings are equal or fail with a diff
+
+    """
+    self.assertTrue(isinstance(expected, str),
+            'Expected argument is not a string')
+    self.assertTrue(isinstance(actual, str),
+            'Actual argument is not a string')
+    expected = open(expected, 'r').readlines()
+    actual = open(actual,'r').readlines()
+    diff = difflib.ndiff(expected,actual)
+    if diff:
+      message = '' + reduce(lambda x, y: x+y, diff)
+      if msg:
+        message += " : " + msg
+      self.fail("Multi-line strings are unequal:\n" + message)
 
   def test_detect_sid(self):
     self.assertEqual(ggva_urls.detect_sid(self.HAS_SID), True)
@@ -32,5 +50,12 @@ class TestGGVAUrlMethods(unittest.TestCase):
     self.assertEqual(ggva_urls.transform_url(self.HAS_SID,self.ID_MAP), self.DLC_DETAILS)
     self.assertEqual(ggva_urls.transform_url(self.HAS_JPEG,self.ID_MAP), self.IIIF_LINK)
 
+  def test_Transformer(self):
+    t = ggva_urls.Transformer(self.ID_MAP)
+    fixture = "fixtures/test/input/NYDA89-F301.html"
+    expected = "fixtures/test/expected/NYDA89-F301.html"
+    actual = "tmp/NYDA89-F301.html"
+    t.transform(fixture,actual)
+    self.assertMultiLineEqual(expected,actual)
 if __name__ == '__main__':
   unittest.main()
