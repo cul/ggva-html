@@ -12,9 +12,13 @@ http://www.columbia.edu/cgi-bin/cul/mrsid/image_jpeg.pl?client=ggva&amp;image=NY
 
 ... should be replaced with a link to the IIIF cache:
 
-https://repository-cache.cul.columbia.edu/images/${PID}/scaled/1200.png
+https://repository-cache.cul.columbia.edu/iiif/${PID}/full/1200,/0/default.png
 
-These links open in a new window.
+In the example above, the ID NYDA.1960.001.00870 maps to the PID ldpd:288341, so the image link source would be:
+
+https://repository-cache.cul.columbia.edu/iiif/ldpd:288341/full/1200,/0/default.png
+
+These links open in a new window in the pages in the images directory, but not in the html/subs directory. 
 
 The MrSID URL:
 
@@ -24,4 +28,20 @@ http://www.columbia.edu/cgi-bin/cul/mrsid/image_sid.pl?client=ggva&amp;image=NYD
 
 https://dlc.library.columbia.edu/catalog/${PID}/details
 
-These links open in a new window.
+... or in the case of NYDA.1960.001.00871:
+
+https://dlc.library.columbia.edu/catalog/ldpd:289436/details
+
+These links open in a new window in the pages in the images directory, but not in the html/subs directory.
+
+SAMPLE DATA MAP:
+
+NYDA.1960.001.00870 ldpd:288341
+NYDA.1960.001.00871 ldpd:289436
+NYDA.1960.001.00872 ldpd:289341
+NYDA.1960.001.00873 ldpd:286821
+
+RUNNING TESTS:
+
+* include lib on PYTHONPATH ENV variable
+* python -m unittest discover -s test
