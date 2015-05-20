@@ -1,33 +1,45 @@
 import unittest
 import difflib
 import ggva_urls
+import re
 class TestGGVAUrlMethods(unittest.TestCase):
   HAS_JPEG = "http://www.columbia.edu/cgi-bin/cul/mrsid/image_jpeg.pl?client=ggva&amp;image=NYDA.1960.001.00870.sid&amp;x=1200&amp;y=800&amp;level=2&amp;width=800&amp;height=600"
   NO_JPEG = "NYDA89-F748.html"
   HAS_SID = "http://www.columbia.edu/cgi-bin/cul/mrsid/image_sid.pl?client=ggva&amp;image=NYDA.1960.001.00871.sid"
   NO_SID = "NYDA89-F748.html"
   DLC_DETAILS = "https://dlc.library.columbia.edu/catalog/ldpd:289436/details"
-  IIIF_LINK = "https://repository-cache.cul.columbia.edu/iiif/ldpd:288341/full/1200,/0/default.png"
+  IIIF_LINK = "https://repository-cache.cul.columbia.edu/iiif/ldpd:288341/full/1200,/0/default.jpg"
   ID_MAP = {
   'NYDA.1960.001.00870' : 'ldpd:288341',
   'NYDA.1960.001.00871' : 'ldpd:289436',
   'NYDA.1960.001.00872' : 'ldpd:289341',
   'NYDA.1960.001.00873' : 'ldpd:286821'
   }
+  def normalize(self,src):
+    src = src.replace("\t",' ')
+    src = src.replace("</br>",'')
+    src = src.replace("</hr>",'')
+    src = src.replace("</meta>",'')
+    src = re.sub(r'\s+',' ',src)
+    return src
+  def ignorable(self,line):
+    line = re.sub(r'[+-]\s*$','  ',line)
+    return line if re.match(r'[+-]\s(.*)$',line) else ''
 
   def assertMultiLineEqual(self, expected, actual, msg=None):
     """Assert that two multi-line strings are equal or fail with a diff
-
+       Normalize some HTML nonsense
     """
     self.assertTrue(isinstance(expected, str),
             'Expected argument is not a string')
     self.assertTrue(isinstance(actual, str),
             'Actual argument is not a string')
-    expected = open(expected, 'r').readlines()
-    actual = open(actual,'r').readlines()
-    diff = difflib.ndiff(expected,actual)
-    if diff:
-      message = '' + reduce(lambda x, y: x+y, diff)
+    expected = map(self.normalize,open(expected, 'r').readlines())
+
+    actual = map(self.normalize,open(actual,'r').readlines())
+    diff = map(self.ignorable,difflib.ndiff(expected,actual))
+    message = ''.join(diff)
+    if len(message) > 0:
       if msg:
         message += " : " + msg
       self.fail("Multi-line strings are unequal:\n" + message)
