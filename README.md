@@ -51,3 +51,17 @@ WARNING: MISSING ID NYDA.1987.003.00128
 WARNING: MISSING ID NYDA.1960.001.00143
 WARNING: MISSING ID NYDA.1960.001.00144
 WARNING: MISSING ID NYDA.1960.001.02004
+
+WARNING: MISSING ID 3302050102 (missing in exhibit)
+WARNING: MISSING ID 3302050202 (missing in exhibit)
+WARNING: MISSING ID 3326010101 (missing in exhibit)
+WARNING: MISSING ID 3328031102 (missing in exhibit)
+WARNING: MISSING ID 3353071201 (present in exhibit, identical to 3438042901 in SCV as ldpd:156161)
+WARNING: MISSING ID 3353071202 (present in exhibit, identical to 3438042902 in SCV as ldpd:156281)
+WARNING: MISSING ID 3353071203 (present in exhibit, identical to 3438042903 in SCV as ldpd:155837)
+WARNING: MISSING ID 3353071204 (present in exhibit, identical to 3438042904 in SCV as ldpd:155937)
+WARNING: MISSING ID 3353071205 (present in exhibit, identical to 3438042905 in SCV as ldpd:155939)
+WARNING: MISSING ID 3401010101 (missing in exhibit)
+WARNING: MISSING ID 3407040110 (missing in exhibit)
+WARNING: MISSING ID 5201030101 (missing in exhibit, sub-631/proj-13712 also missing)
+WARNING: MISSING ID 5201030201 (missing in exhibit, sub-631/proj-13712 also missing)
