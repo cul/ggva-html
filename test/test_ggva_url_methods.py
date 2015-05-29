@@ -1,7 +1,8 @@
 import unittest
 import difflib
-import ggva_urls
+import mrsid
 import re
+import os
 class TestGGVAUrlMethods(unittest.TestCase):
   HAS_JPEG = "http://www.columbia.edu/cgi-bin/cul/mrsid/image_jpeg.pl?client=ggva&amp;image=NYDA.1960.001.00870.sid&amp;x=1200&amp;y=800&amp;level=2&amp;width=800&amp;height=600"
   NO_JPEG = "NYDA89-F748.html"
@@ -45,29 +46,55 @@ class TestGGVAUrlMethods(unittest.TestCase):
       self.fail("Multi-line strings are unequal:\n" + message)
 
   def test_detect_sid(self):
-    self.assertEqual(ggva_urls.detect_sid(self.HAS_SID), True)
-    self.assertEqual(ggva_urls.detect_sid(self.HAS_JPEG), False)
-    self.assertEqual(ggva_urls.detect_sid(self.NO_SID), False)
+    self.assertEqual(mrsid.detect_sid(self.HAS_SID), True)
+    self.assertEqual(mrsid.detect_sid(self.HAS_JPEG), False)
+    self.assertEqual(mrsid.detect_sid(self.NO_SID), False)
 
   def test_detect_jpeg(self):
-    self.assertEqual(ggva_urls.detect_jpeg(self.HAS_JPEG), True)
-    self.assertEqual(ggva_urls.detect_jpeg(self.HAS_SID), False)
-    self.assertEqual(ggva_urls.detect_jpeg(self.NO_JPEG), False)
+    self.assertEqual(mrsid.detect_jpeg(self.HAS_JPEG), True)
+    self.assertEqual(mrsid.detect_jpeg(self.HAS_SID), False)
+    self.assertEqual(mrsid.detect_jpeg(self.NO_JPEG), False)
 
   def test_parse_id(self):
-    self.assertEqual(ggva_urls.parse_id(self.HAS_SID), 'NYDA.1960.001.00871')
-    self.assertEqual(ggva_urls.parse_id(self.HAS_JPEG), 'NYDA.1960.001.00870')
+    self.assertEqual(mrsid.parse_id(self.HAS_SID), 'NYDA.1960.001.00871')
+    self.assertEqual(mrsid.parse_id(self.HAS_JPEG), 'NYDA.1960.001.00870')
 
   def test_transform_url(self):
-    self.assertEqual(ggva_urls.transform_url(self.HAS_SID,self.ID_MAP), self.DLC_DETAILS)
-    self.assertEqual(ggva_urls.transform_url(self.HAS_JPEG,self.ID_MAP), self.IIIF_LINK)
-
+    self.assertEqual(mrsid.transform_url(self.HAS_SID,self.ID_MAP), self.DLC_DETAILS)
+    self.assertEqual(mrsid.transform_url(self.HAS_JPEG,self.ID_MAP), self.IIIF_LINK)
+  def test_read_map(self):
+    path = 'tmp/map.tmp'
+    with open(path,'w',0) as f:
+      f.write('pid,id\n')
+      f.write('foo,bar\n')
+      f.flush
+      os.fsync(f)
+    m = mrsid.read_map(path)
+    self.assertEqual('foo',m['bar'])
+    with open(path,'w',0) as f:
+      f.write('foo,bar\n')
+      f.flush
+      os.fsync(f)
+    m = mrsid.read_map(path)
+    self.assertEqual('bar',m['foo'])
   def test_Transformer(self):
-    t = ggva_urls.Transformer(self.ID_MAP)
+    t = mrsid.Transformer(self.ID_MAP)
     fixture = "fixtures/test/input/NYDA89-F301.html"
     expected = "fixtures/test/expected/NYDA89-F301.html"
     actual = "tmp/NYDA89-F301.html"
     t.transform(fixture,actual)
     self.assertMultiLineEqual(expected,actual)
+  def test_Transformer_directories(self):
+    t = mrsid.Transformer(self.ID_MAP)
+    fixture = "fixtures/test/input"
+    expected = "fixtures/test/expected/NYDA89-F301.html"
+    actual = "tmp/NYDA89-F301.html"
+    t.transform(fixture,"tmp")
+    self.assertMultiLineEqual(expected,actual)
+  def test_Transformer_map(self):
+    t = mrsid.Transformer(self.ID_MAP)
+    expected = 'ldpd:286821'
+    actual = t.pid_for('NYDA.1960.001.00873')
+    self.assertEqual(actual, expected)
 if __name__ == '__main__':
   unittest.main()
