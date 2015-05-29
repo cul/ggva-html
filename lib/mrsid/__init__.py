@@ -27,7 +27,9 @@ def parse_id(input):
 def transform_url(path,id_map):
   _id = parse_id(path)
   if _id:
-    if _id not in id_map: return False
+    if _id not in id_map:
+      print "WARNING: MISSING ID " + _id
+      return False
 #       replace URL
     format = IIIF_LINK if detect_jpeg(path) else DLC_DETAILS
     return format % {'pid' : id_map[_id]}
