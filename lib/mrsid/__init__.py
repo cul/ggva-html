@@ -2,6 +2,7 @@
 from urlparse import urlparse, parse_qs
 from os import listdir
 from os.path import exists, isdir, basename, join
+import sys
 import re
 from xml.etree.ElementTree import ElementTree
 from bs4 import BeautifulSoup
@@ -20,9 +21,11 @@ def parse_id(input):
     q = parse_qs(urlparse(input).query)
     if 'image' in q:
       # there are some input files that have mistakenly encoded sid identifiers
-      return re.sub(r'\.sid(\.sid)?$','',q['image'][0])
+      parsed = re.sub(r'\.sid(\.sid)?$','',q['image'][0])
+      return parsed
     else:
-      return q
+      print input
+      #return q
   return False
 def transform_url(path,id_map):
   _id = parse_id(path)
@@ -68,13 +71,14 @@ class Transformer:
   def pid_for(self, path):
     return self.id_map[path]
   def transform_file(self,input,output):
+    if isdir(input): return
+    if re.search(r'\.html?$',input) == None: return
     if isdir(output):
       output = join(output,basename(input))
-    input = open(input,'r')
-    src = input.read()
+    with open(input,'r') as inputfile:
+      src = inputfile.read()
     soup = Whitespace(src, 'html.parser')
     soup.convertHTMLEntities = False
-    input.close()
     delta = False
     for a in soup.find_all('a'):
 
@@ -88,11 +92,17 @@ class Transformer:
           a.string.replace_with('Zoom')
     if delta:
       src = soup.encode("utf8",formatter="html")
-    open(output,'w').write(src)
+    if (input != output) or delta:
+      with open(output,'w') as f: f.write(src)
   def transform(self, input, output):
     if isdir(input):
       for file in listdir(input):
         if not isdir(file):
-          self.transform_file(join(input,file),output)
+          try:
+            self.transform_file(join(input,file),output)
+          except:
+            e = sys.exc_info()[0]
+            print join(input,file)
+            print e
     else:
       self.transform_file(input,output)
